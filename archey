@@ -1,0 +1,35 @@
+#!/bin/sh
+
+kernel=$(uname -r)
+kernel=$(echo "${kernel}" | sed -e 's/(.*)//')
+
+packages=$(($(cygcheck -cd | wc -l) - 2))
+
+cpu=$(cat /proc/cpuinfo | grep 'model name' | sed -e 's/^.*: *//')
+# removes (R) and (TM) from the CPU name so it fits in a standard 80 window
+cpu=$(echo "${cpu}" | awk '$1=$1' | sed 's/([A-Z]\{1,2\})//g')
+
+memorykb=$(cat /proc/meminfo | grep MemTotal: | sed -e 's/MemTotal: *//' -e 's/kB//')
+memorymb=$((memorykb/1024))
+
+echo -e "
+     ________________,
+  .QQQQQQQQQQQQQQQQQQQQL_
+ .QQQQQQQQQQQQQQQQQQQQQQQQQQ_
+ QQQQQQQQQQQQQQQQQQQQQQF=QQQ=
+ QQQQQQQ=============!             User: $(whoami)
+ QQQQQQ                            Hostname: $(hostname)
+ QQQQQQ                            OS: $(uname)
+ QQQQQQ    ~\"jj__,                 Kernel: ${kernel} ($(uname -m))
+ QQQQQQ      \"jjjjjjjj___          Uptime: $(uptime | sed 's/.*up \([^,]*\), .*/\1/')
+ QQQQQQ       _jjjjjjjjjjj/~~~     Shell: ${SHELL}
+ QQQQQQ     .{jjjjj/~~~~~          Terminal: ${TERM}
+ QQQQQQ    .{/~~~\`                 Packages: ${packages}
+ QQQQQQ                            CPU: ${cpu}
+ QQQQQQ                            Memory: ${memorymb}MB
+ QQQQQQQL____________,             Disk: $(df -h / | tail -1 | awk '{print $2}')B
+ 4QQQQQQQQQQQQQQQQQQQQQQQQQQ__
+ (QQQQQQQQQQQQQQQQQQQQQQQQ===
+  (QQQQQQQQQQQQQQQQQQQQF=
+"
+
